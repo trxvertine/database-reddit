@@ -1,0 +1,123 @@
+erDiagram
+  user {
+    uuid id PK
+    varchar username
+    varchar email
+    text password_hash
+    text avatar_url
+    integer karma
+    timestamptz created_at
+  }
+
+  group {
+    uuid id PK
+    uuid created_by FK
+    varchar name
+    text description
+    text banner_url
+    integer member_count
+    boolean is_nsfw
+    timestamptz created_at
+  }
+
+  follow {
+    uuid user_id FK
+    uuid subreddit_id FK
+    timestamptz subscribed_at
+  }
+
+  moderator {
+    uuid user_id FK
+    uuid subreddit_id FK
+    text permissions
+    timestamptz added_at
+  }
+
+  post {
+    uuid id PK
+    uuid author_id FK
+    uuid subreddit_id FK
+    post_type type
+    varchar title
+    text body
+    text url
+    integer score
+    integer comment_count
+    boolean is_archived
+    timestamptz created_at
+  }
+
+  comment {
+    uuid id PK
+    uuid post_id FK
+    uuid author_id FK
+    uuid parent_comment_id FK
+    text body
+    integer score
+    boolean is_archived
+    timestamptz created_at
+  }
+
+  vote {
+    uuid id PK
+    uuid user_id FK
+    uuid target_id
+    vote_target target_type
+    smallint value
+    timestamptz created_at
+  }
+
+  tag {
+    uuid id PK
+    uuid subreddit_id FK
+    varchar text
+    char color
+  }
+
+  post_tag {
+    uuid post_id FK
+    uuid tag_id FK
+    timestamptz assigned_at
+  }
+
+  report {
+    uuid id PK
+    uuid reporter_id FK
+    uuid resolved_by FK
+    uuid target_id
+    report_target target_type
+    varchar reason
+    report_status status
+    timestamptz created_at
+    timestamptz resolved_at
+  }
+
+  notification {
+    uuid id PK
+    uuid user_id FK
+    uuid actor_id FK
+    uuid target_id
+    notification_type type
+    notification_target target_type
+    boolean is_read
+    timestamptz created_at
+  }
+
+  user ||--o{ group : "creates"
+  user ||--o{ follow : "subscribes"
+  group ||--o{ follow : "followed by"
+  user ||--o{ moderator : "moderates"
+  group ||--o{ moderator : "moderated by"
+  user ||--o{ post : "authors"
+  group ||--o{ post : "contains"
+  post ||--o{ comment : "has"
+  user ||--o{ comment : "authors"
+  comment o|--o{ comment : "replies to"
+  user ||--o{ vote : "casts"
+  group ||--o{ tag : "defines"
+  post ||--o{ post_tag : "tagged with"
+  tag ||--o{ post_tag : "applied to"
+  user ||--o{ report : "files"
+  user o|--o{ report : "resolves"
+  user ||--o{ notification : "receives"
+  user o|--o{ notification : "acts in"
